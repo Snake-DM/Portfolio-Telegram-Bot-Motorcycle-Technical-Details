@@ -4,7 +4,7 @@ from states.contact_info import UserInfoState
 from telebot.types import Message
 
 
-@bot.message_handlers(commands=['survey'])
+@bot.message_handler(commands=['survey'])
 def survey(message: Message) -> None:
     bot.set_state(message.from_user.id, UserInfoState.name, message.chat.id)
     bot.send_message(message.from_user.id, f'Здравствуйте, '
@@ -12,7 +12,7 @@ def survey(message: Message) -> None:
                                            f'введите свое имя ')
 
 
-@bot.message_handlers(state=UserInfoState.name)
+@bot.message_handler(state=UserInfoState.name)
 def get_name(message: Message) -> None:
     if message.text.isalpha():
         bot.send_message(message.from_user.id, 'Благодарю. Введите свой '
@@ -26,7 +26,7 @@ def get_name(message: Message) -> None:
                                                'буквы')
 
 
-@bot.message_handlers(state=UserInfoState.age)
+@bot.message_handler(state=UserInfoState.age)
 def get_age(message: Message) -> None:
     if message.text.isdigit():
         bot.send_message(message.from_user.id, 'Благодарю. Введите страну '
@@ -41,7 +41,7 @@ def get_age(message: Message) -> None:
                                                'только цифры')
 
 
-@bot.message_handlers(state=UserInfoState.country)
+@bot.message_handler(state=UserInfoState.country)
 def get_country(message: Message) -> None:
     if message.text.isalpha():
         bot.send_message(message.from_user.id, 'Благодарю. Введите свой '
@@ -55,7 +55,7 @@ def get_country(message: Message) -> None:
                                                'буквы')
 
 
-@bot.message_handlers(state=UserInfoState.city)
+@bot.message_handler(state=UserInfoState.city)
 def get_city(message: Message) -> None:
     if message.text.isalpha():
         bot.send_message(message.from_user.id,
@@ -71,7 +71,7 @@ def get_city(message: Message) -> None:
                                                'буквы')
 
 
-@bot.message_handlers(content_types=['text', 'contact'],
+@bot.message_handler(content_types=['text', 'contact'],
                       state=UserInfoState.number)
 def get_number(message: Message) -> None:
     if message.content_type == 'contact':
