@@ -22,11 +22,11 @@ def api_request(method_endswith=str,
             url=url,
             params=params
         )
-    else:
-        return post_request(
-            url=url,
-            params=params
-        )
+    # else:
+        # return post_request(
+        #     url=url,
+        #     params=params
+        # )
 
 
 def get_request(url, params):
