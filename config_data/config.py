@@ -8,8 +8,13 @@ else:
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 RAPID_API_KEY = os.getenv("RAPID_API_KEY")
+RAPID_API_HOST = os.getenv("RAPID_API_HOST")
 DEFAULT_COMMANDS = (
     ("start", "Запустить бота"),
-    ("help", "Вывести справку"),
-    ("survey", "Опрос")
+    ("brand", "Поиск по брэнду"),
+    ("model", "Поиск по модели"),
+    ("year", "Поиск по году выпуска"),
+    ("history", "История запросов"),
+    ("stop", "Остановить бота"),
+    ("help", "Вывести справку")
 )
