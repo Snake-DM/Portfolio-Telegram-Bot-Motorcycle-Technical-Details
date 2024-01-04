@@ -1,6 +1,8 @@
 import json
 
 from telebot.types import Message
+
+from database import database
 from loader import bot
 from states.search_states import SearchStates
 from custom_requests.api_request import api_request
@@ -13,6 +15,11 @@ def model_query(message: Message) -> None:
     bot.send_message(message.from_user.id, f'Введите название модели, '
                                            f'которую Вы ищете.')
 
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
 
 @bot.message_handler(state=SearchStates.model)
 def get_model(message: Message) -> None:
@@ -21,6 +28,13 @@ def get_model(message: Message) -> None:
     bot.send_message(message.from_user.id, 'Желаете указать год выпуска? '
                                            '(да/нет)')
     bot.register_next_step_handler(message, get_model_year)
+
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
+
 
 def get_model_year(message: Message):
     if message.text == 'да':
@@ -31,6 +45,13 @@ def get_model_year(message: Message):
     else:
         bot.send_message(message.from_user.id, 'Введите Да или Нет.')
         bot.register_next_step_handler(message, get_model_year)
+
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
+
 
 def get_model_year_yes(message: Message):
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -54,6 +75,12 @@ def get_model_year_yes(message: Message):
             # tail message
             answer = message_max_length(answer)[1]
         bot.delete_state(message.from_user.id)
+
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
 
 
 def get_model_year_no(message: Message):

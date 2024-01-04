@@ -1,4 +1,6 @@
 from telebot.types import Message
+
+from database import database
 from loader import bot
 from custom_requests.api_request import api_request
 from states.search_states import SearchStates
@@ -12,6 +14,12 @@ def brand_query(message: Message) -> None:
     bot.send_message(message.from_user.id, f'Введите название брэнда, '
                                            f'который Вы ищете.')
 
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
+
 
 @bot.message_handler(state=SearchStates.brand)
 def get_brand(message: Message) -> None:
@@ -21,16 +29,37 @@ def get_brand(message: Message) -> None:
                                            '(да/нет)')
     bot.register_next_step_handler(message, get_brand_year)
 
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
+
 
 def get_brand_year(message: Message):
     if message.text == 'да':
         bot.send_message(message.from_user.id, 'Какой год выпуска?')
         bot.register_next_step_handler(message, get_brand_year_yes)
+
+        # history log update
+        database.UserMessageLog.create(
+                from_user_id=message.from_user.id,
+                user_message=message.text,
+        )
+
     elif message.text == 'нет':
         get_brand_year_no(message)
+
+        # history log update
+        database.UserMessageLog.create(
+                from_user_id=message.from_user.id,
+                user_message=message.text,
+        )
+
     else:
         bot.send_message(message.from_user.id, 'Введите Да или Нет.')
         bot.register_next_step_handler(message, get_brand_year)
+
 
 
 def get_brand_year_yes(message: Message):
@@ -57,6 +86,11 @@ def get_brand_year_yes(message: Message):
             answer = message_max_length(answer)[1]
         bot.delete_state(message.from_user.id)
 
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
 
 def get_brand_year_no(message: Message):
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -80,3 +114,9 @@ def get_brand_year_no(message: Message):
             # tail message
             answer = message_max_length(answer)[1]
         bot.delete_state(message.from_user.id)
+
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )

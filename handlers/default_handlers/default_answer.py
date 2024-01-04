@@ -1,4 +1,6 @@
 from telebot.types import Message
+
+from database import database
 from loader import bot
 
 
@@ -9,3 +11,9 @@ from loader import bot
 def default_answer(message: Message):
     bot.send_message(message.chat.id, "Не понимаю Вас: \"" + message.text +
                      "\".\nПопробуйте получить помощь, введя команду /help")
+
+    # history log update
+    database.UserMessageLog.create(
+            from_user_id=message.from_user.id,
+            user_message=message.text,
+    )
