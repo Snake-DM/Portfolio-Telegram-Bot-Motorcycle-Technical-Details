@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 .idea/*
 .env
-.ds_store
+.DS_Store
 bot_env/*
 config_data/.DS_Store
 handlers/.DS_Store
