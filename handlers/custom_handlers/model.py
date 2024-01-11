@@ -11,6 +11,12 @@ from utils.message_max_length_validation import message_max_length
 
 @bot.message_handler(commands=["model"])
 def model_query(message: Message) -> None:
+    """
+    This handler starts a search by Model.
+
+    :param message: incoming message from a user
+    :return: none
+    """
     bot.set_state(message.from_user.id, SearchStates.model, message.chat.id)
     bot.send_message(message.from_user.id, f'Введите название модели, '
                                            f'которую Вы ищете.')
@@ -23,6 +29,13 @@ def model_query(message: Message) -> None:
 
 @bot.message_handler(state=SearchStates.model)
 def get_model(message: Message) -> None:
+    """
+    Function receives a Model name, requests a Year parameter (yes/no) and
+    redirects to appropriate function
+
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['model'] = message.text
     bot.send_message(message.from_user.id, 'Желаете указать год выпуска? '
@@ -36,7 +49,14 @@ def get_model(message: Message) -> None:
     )
 
 
-def get_model_year(message: Message):
+def get_model_year(message: Message) -> None:
+    """
+    Function redirects to other function based on Year
+    parameter (yes/no)
+
+    :param message: incoming message from a user
+    :return: none
+    """
     if message.text == 'да':
         bot.send_message(message.from_user.id, 'Какой год выпуска?')
         bot.register_next_step_handler(message, get_model_year_yes)
@@ -54,6 +74,12 @@ def get_model_year(message: Message):
 
 
 def get_model_year_yes(message: Message):
+    """
+    Function extracts data with Year parameter "Yes".
+
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
     answer = api_request("/v1/motorcycles",
@@ -83,7 +109,13 @@ def get_model_year_yes(message: Message):
     )
 
 
-def get_model_year_no(message: Message):
+def get_model_year_no(message: Message) -> None:
+    """
+    Function extracts data with Year parameter "No".
+
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         pass
     answer = api_request("/v1/motorcycles",

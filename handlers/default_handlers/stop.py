@@ -6,6 +6,11 @@ from loader import bot
 
 @bot.message_handler(commands=["stop"])
 def bot_stop(message: Message) -> None:
+    """
+    Function stops the Bot for the current User.
+    :param message: incoming message from a user
+    :return: none
+    """
     bot.reply_to(message, f"До свидания, {message.from_user.full_name}!")
     bot.delete_state(message.from_user.id, message.chat.id)
 

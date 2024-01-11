@@ -5,7 +5,12 @@ from loader import bot
 
 
 @bot.message_handler(commands=["help"])
-def bot_help(message: Message):
+def bot_help(message: Message) -> None:
+    """
+    This handler sends a message with a Help information
+    :param message: incoming message from a user
+    :return: none
+    """
     text = [f"/{command} - {description}" for command, description in
             DEFAULT_COMMANDS]
     bot.reply_to(message, "\n".join(text))

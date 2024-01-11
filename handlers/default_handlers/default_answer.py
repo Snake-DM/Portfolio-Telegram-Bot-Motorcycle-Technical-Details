@@ -4,11 +4,16 @@ from database import database
 from loader import bot
 
 
-# default handler for every other text
-# this is the standard reply to unknown message
 
 @bot.message_handler(state=None)
-def default_answer(message: Message):
+def default_answer(message: Message) -> None:
+    """
+    A default handler for every other text. This is the standard reply to
+    unknown message
+
+    :param message: incoming message from a user
+    :return: none
+    """
     bot.send_message(message.chat.id, "Не понимаю Вас: \"" + message.text +
                      "\".\nПопробуйте получить помощь, введя команду /help")
 

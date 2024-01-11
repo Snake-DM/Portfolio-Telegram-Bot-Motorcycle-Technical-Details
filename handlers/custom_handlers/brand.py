@@ -10,6 +10,12 @@ import json
 
 @bot.message_handler(commands=["brand"])
 def brand_query(message: Message) -> None:
+    """
+    This handler starts a search by Brand.
+
+    :param message: incoming message from a user
+    :return: none
+    """
     bot.set_state(message.from_user.id, SearchStates.brand, message.chat.id)
     bot.send_message(message.from_user.id, f'Введите название брэнда, '
                                            f'который Вы ищете.')
@@ -23,6 +29,12 @@ def brand_query(message: Message) -> None:
 
 @bot.message_handler(state=SearchStates.brand)
 def get_brand(message: Message) -> None:
+    """
+    Function registers a Brand name and requests a Year parameter (yes/no).
+
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['brand'] = message.text
     bot.send_message(message.from_user.id, 'Желаете указать год выпуска? '
@@ -36,7 +48,14 @@ def get_brand(message: Message) -> None:
     )
 
 
-def get_brand_year(message: Message):
+def get_brand_year(message: Message) -> None:
+    """
+    TODO Update: Function redirects to other function based on Year
+    parameter (yes/no)
+
+    :param message: incoming message from a user
+    :return: none
+    """
     if message.text == 'да':
         bot.send_message(message.from_user.id, 'Какой год выпуска?')
         bot.register_next_step_handler(message, get_brand_year_yes)
@@ -61,8 +80,13 @@ def get_brand_year(message: Message):
         bot.register_next_step_handler(message, get_brand_year)
 
 
+def get_brand_year_yes(message: Message) -> None:
+    """
+    Function extracts data with Year parameter "Yes".
 
-def get_brand_year_yes(message: Message):
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
     answer = api_request("/v1/motorcycles",
@@ -92,7 +116,14 @@ def get_brand_year_yes(message: Message):
             user_message=message.text,
     )
 
-def get_brand_year_no(message: Message):
+
+def get_brand_year_no(message: Message) -> None:
+    """
+    Function extracts data with Year parameter "No".
+
+    :param message: incoming message from a user
+    :return: none
+    """
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         pass
     answer = api_request("/v1/motorcycles",

@@ -7,12 +7,16 @@ import os.path
 
 
 @bot.message_handler(commands=["start"])
-def bot_start(message: Message):
+def bot_start(message: Message) -> None:
+    """
+   Function requests a new username.
+   :param message: incoming message from a user
+   :return: None
+   """
 
     if database.UserData.get_or_none(from_user_id=message.from_user.id):
         bot.send_message(message.from_user.id,
-                         'Бот уже запущен. Ответьте на вопрос или '
-                         'воспользуйтесь командой')
+                         'Бот уже запущен. Воспользуйтесь другой командой.')
         bot.delete_state(message.from_user.id, message.chat.id)
     else:
         bot.send_message(message.from_user.id,
@@ -40,6 +44,11 @@ def bot_start(message: Message):
 
 @bot.message_handler(state=UserInfoState.name)
 def get_name(message: Message) -> None:
+    """
+    Function register a user's name and requests an age
+    :param message: incoming message from a user
+    :return: None
+    """
     if message.text.isalpha():
         bot.set_state(message.from_user.id, UserInfoState.age, message.chat.id)
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -62,6 +71,11 @@ def get_name(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.age, is_digit=True)
 def get_age(message: Message) -> None:
+    """
+    Function registers the Age and requests a motorcycle experience
+    :param message: incoming message from a user
+    :return: None
+    """
     bot.set_state(message.from_user.id,
                   UserInfoState.moto_driving_experience, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
@@ -79,6 +93,11 @@ def get_age(message: Message) -> None:
 
 @bot.message_handler(state=UserInfoState.age, is_digit=False)
 def get_age_wrong(message: Message) -> None:
+    """
+    Function filters an Age wrong input
+    :param message: incoming message from a user
+    :return: None
+    """
     bot.send_message(message.from_user.id,
                      'Возраст может содержать только цифры. Попробуйте '
                      'ещё раз')
@@ -87,6 +106,11 @@ def get_age_wrong(message: Message) -> None:
 @bot.message_handler(state=UserInfoState.moto_driving_experience,
                      is_digit=True)
 def get_moto_experience(message: Message) -> None:
+    """
+    Function registers motorcycle experience and publish a user summary data
+    :param message: incoming message from a user
+    :return: None
+    """
     bot.send_message(message.from_user.id, 'Благодарю')
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['moto_experience'] = message.text
@@ -125,6 +149,11 @@ def get_moto_experience(message: Message) -> None:
 @bot.message_handler(state=UserInfoState.moto_driving_experience,
                      is_digit=False)
 def get_moto_experience(message: Message) -> None:
+    """
+    Function filters a motorcycle experience wrong input
+    :param message: incoming message from a user
+    :return: None
+    """
     bot.send_message(message.from_user.id, 'Опыт вождения может '
                                            'содержать только цифры. '
                                            'Попробуйте ещё раз.')
