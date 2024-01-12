@@ -25,9 +25,9 @@ class BaseModel(Model):
 
 class UserData(BaseModel):
     from_user_id = CharField()
-    name = CharField()
-    age = CharField()
-    moto_experience = CharField()
+    name = CharField(null=True)
+    age = CharField(null=True)
+    moto_experience = CharField(null=True)
 
     class Meta:
         db_table = 'Active Users'
