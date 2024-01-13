@@ -26,10 +26,7 @@ def bot_start(message: Message) -> None:
 
         # with database.main_db:
         database.UserData.create(
-                from_user_id=message.from_user.id,
-                name='',
-                age='',
-                moto_experience='')
+                from_user_id=message.from_user.id)
 
         # history log update
         database.UserMessageLog.create(
