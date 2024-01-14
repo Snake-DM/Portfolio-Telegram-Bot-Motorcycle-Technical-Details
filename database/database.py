@@ -1,5 +1,6 @@
 import os
 from peewee import *
+from loguru import logger
 
 
 work_directory = os.path.abspath(os.getcwd())
@@ -13,6 +14,7 @@ else:
         print('New database has been created successfully')
     except Exception as err:
         print('Error: ', err)
+        logger.debug('Error')
 
 
 class BaseModel(Model):
