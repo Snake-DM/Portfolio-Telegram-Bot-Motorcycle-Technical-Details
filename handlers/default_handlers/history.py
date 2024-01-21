@@ -1,8 +1,8 @@
 from telebot.types import Message
 
 from database import database
+from database.db_crud import db_customCRUD
 from loader import bot
-from states.search_states import SearchStates
 
 
 @bot.message_handler(commands=['history'])
@@ -19,7 +19,10 @@ def print_history(message: Message) -> None:
             database.UserMessageLog.from_user_id ==
             message.from_user.id)
     user_history_message_list = [message.user_message for message in
-                              user_messages]
+                                 user_messages]
 
     history_reply = '\n'.join(user_history_message_list[-10:])
     bot.send_message(message.from_user.id, history_reply)
+
+    # history log update
+    db_customCRUD.log_message(message.from_user.id, message.text)

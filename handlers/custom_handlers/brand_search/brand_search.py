@@ -1,8 +1,11 @@
 from telebot.types import Message
 
-from database import database
+from database.db_crud import db_customCRUD
+from keyboards.reply.year_keyboard import year_buttons
 from loader import bot
+from states.contact_info import UserInfoState
 from states.search_states import SearchStates
+
 
 
 @bot.message_handler(commands=["brand"])
@@ -18,10 +21,7 @@ def brand_query(message: Message) -> None:
                                            f'который Вы ищете.')
 
     # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
+    db_customCRUD.log_message(message.from_user.id, message.text)
 
 
 @bot.message_handler(state=SearchStates.brand)
@@ -37,11 +37,9 @@ def get_brand_name(message: Message) -> None:
     bot.set_state(message.from_user.id,
                   SearchStates.brand_year_no,
                   message.chat.id)
-    bot.send_message(message.from_user.id, 'Желаете указать год выпуска? '
-                                           '(да/нет)')
+    bot.send_message(message.from_user.id,
+                     'Желаете указать год выпуска? (да/нет)',
+                     reply_markup=year_buttons())
 
     # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
+    db_customCRUD.log_message(message.from_user.id, message.text)

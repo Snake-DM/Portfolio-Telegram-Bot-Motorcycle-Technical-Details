@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from typing import Callable, Any
 from loguru import logger
 
@@ -9,7 +10,7 @@ from config_data.config import RAPID_API_KEY, RAPID_API_HOST
 def api_request(method_endswith: str,
                 params: dict,
                 method_type: str
-                ) -> Callable:
+                ) -> Iterable:
     """
     This function makes requests to API
 
@@ -23,13 +24,6 @@ def api_request(method_endswith: str,
 
     if method_type == 'GET':
         return get_request(url, params)
-
-    # This part is for future use if necessary
-    # else:
-        # return post_request(
-        #     url=url,
-        #     params=params
-        # )
 
 
 @logger.catch
@@ -52,24 +46,5 @@ def get_request(url: str, params: dict) -> Any:
     if response.status_code == requests.codes.ok:
         return response.json()
     else:
-        print('Сбой запроса к серверу')
         logger.debug('Server Error')
-        return None
-
-
-# This part is for future use if necessary
-
-# def post_request(url: str, params: dict) -> Any:
-#     try:
-#         response = requests.post(
-#                 url,
-#                 headers={"X-RapidAPI-Key":  RAPID_API_KEY,
-#                          "X-RapidAPI-Host": RAPID_API_HOST},
-#                 params=params,
-#                 timeout=15
-#         )
-#         if response.status_code == requests.codes.ok:
-#             print(response.json())
-#             return response.json()
-#     except Exception as exc:
-#         print(exc, type(exc), 'Что-то пошло не так.. Попробуйте ещё раз.')
+        return
