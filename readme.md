@@ -4,6 +4,12 @@ This bot extracts a motocycle technical data from a third party library at
 www.rapidapi.com by a user request.
 Source: https://rapidapi.com/apininjas/api/motorcycles-by-api-ninjas
 
+Result preview:
+
+
+![Bot_View](/pictures/Bot_View.png)
+
+
 To run the code:
 1. create a file ".env" in root folder
 2. fill ".env" with data. Refer to ".env.template" file in root folder.
