@@ -7,7 +7,7 @@ Source: https://rapidapi.com/apininjas/api/motorcycles-by-api-ninjas
 Result preview:
 
 
-![Bot_View](/pictures/Bot_View.png)
+![Bot_View](utils/pictures/Bot_View.png)
 
 
 To run the code:
