@@ -10,6 +10,7 @@ Result preview:
 ![Bot_View](utils/pictures/Bot_View.png)
 
 
+
 To run the code:
 1. create a file ".env" in root folder
 2. fill ".env" with data. Refer to ".env.template" file in root folder.
