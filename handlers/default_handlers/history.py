@@ -14,10 +14,14 @@ def print_history(message: Message) -> None:
     :return: none
     """
     # getting a chat history from DB
-    bot.send_message(message.from_user.id, 'Ваша история запросов:')
-    user_messages = database.UserMessageLog.select().where(
-            database.UserMessageLog.from_user_id ==
-            message.from_user.id)
+    bot.send_message(message.from_user.id,
+                     'Ваша история запросов (последние 10 записей):')
+    user_messages = (
+        database.
+        UserMessageLog.
+        select().
+        where(database.UserMessageLog.from_user_id == message.from_user.id)
+        )
     user_history_message_list = [message.user_message for message in
                                  user_messages]
 

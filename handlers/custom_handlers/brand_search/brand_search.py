@@ -1,11 +1,9 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
 
 from database.db_crud import db_customCRUD
 from keyboards.reply.year_keyboard import year_buttons
 from loader import bot
-from states.contact_info import UserInfoState
 from states.search_states import SearchStates
-
 
 
 @bot.message_handler(commands=["brand"])

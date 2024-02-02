@@ -19,7 +19,8 @@ def db_create() -> SqliteDatabase:
         print("A database exists already and it will continue logging.")
     else:
         print('New database has been created successfully.')
-    new_db = SqliteDatabase(os.path.join('database', 'participants.db'))
+    # new_db = SqliteDatabase(os.path.join('database', 'participants.db'))
+    new_db = SqliteDatabase(db_abspath)
     return new_db
 
 
@@ -35,7 +36,9 @@ class BaseModel(Model):
 
 
 class UserData(BaseModel):
-    created_at = DateTimeField(default=datetime.datetime.now())
+    created_at = DateTimeField(default=datetime.datetime.now().isoformat(
+                               sep=' ', timespec='seconds'))
+                               # strftime("%Y-%m-%d %H:%M:%S"))
     from_user_id = IntegerField()
     nickname = CharField(null=True)
     firstname = CharField(null=True)
@@ -48,7 +51,9 @@ class UserData(BaseModel):
 
 
 class UserMessageLog(BaseModel):
-    created_at = DateTimeField(default=datetime.datetime.now())
+    created_at = DateTimeField(default=datetime.datetime.now().isoformat(
+                               sep=' ', timespec='seconds'))
+                               # strftime("%Y-%m-%d %H:%M:%S"))
     from_user_id = ForeignKeyField(UserData)
     user_message = CharField()
 

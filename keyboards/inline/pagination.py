@@ -1,83 +1,92 @@
 import json
-from collections.abc import Iterable
-
 from telebot.types import (InlineKeyboardMarkup,
                            InlineKeyboardButton,
                            Message)
-
 from loader import bot
 
+# TODO will these global vars work for multiply users?
+incoming_data = list()
+incoming_data_length = 0
 
-def message_by_page(data: list = None,
-                    message: Message = None,
-                    previous_message: Message = None,
-                    page: int = 1,
-                    page_total: int = None) -> None:
 
-    if data:
-        data_list = data[:]
-    if page < 0:
-        bot.send_message(message.from_user.id,
-                         'Выход из режима просмотра завершён.\n'
-                         'Введите команду.')
-        bot.delete_state(message.from_user.id, message.chat.id)
+def search_result_freeze(*args, page_index: int = 1) -> (dict, list):
+    """
+    Function saves a search result for a pagination process only.
+    Search data is removed once a user exits from pagination.
+    :param args: incoming data as an iterator from API request
+    :param page_index: int, page indicator
+    :return:
+        (single page text, total pages) if paginator is active;
+    (incoming data = empty, total pages = 0) if exit from paginator
+    """
+    global incoming_data, incoming_data_length
+
+    if not incoming_data:
+        incoming_data = [item for item in args[0]]
+        incoming_data_length = len(incoming_data)
+    if page_index <= incoming_data_length:
+        page_data = incoming_data[page_index - 1]
+        return page_data, incoming_data_length
     else:
+        incoming_data.clear()
+        incoming_data_length = 0
+        print('Лист входящего результата поиска обнулён!', incoming_data)
+        return incoming_data, incoming_data_length
 
-        left = page - 1 if page != 1 else page_total
-        right = page + 1 if page != page_total else 1
 
-        keyboard_pages = InlineKeyboardMarkup()
+def message_by_page(message: Message,
+                    page: int = 1,
+                    ) -> None:
+    """
+    Function-paginator for search result messages. It extracts page text from
+    search_result_freeze(), creates buttons and send it to user.
+    :param message: message text
+    :param page: int, page indicator
+    :return: none
+    """
 
-        left_button = InlineKeyboardButton("←",
-                                           callback_data=f'to {left}')
-        page_button = InlineKeyboardButton(f"{str(page)}/{str(page_total)}",
-                                           callback_data='_')
-        right_button = InlineKeyboardButton("→",
-                                            callback_data=f'to {right}')
-        exit_button = InlineKeyboardButton("Exit", callback_data='exit')
-        keyboard_pages.add(left_button, page_button, right_button)
-        keyboard_pages.add(exit_button)
+    page_data = search_result_freeze(page_index=page)[0]
+    page_total = search_result_freeze(page_index=page)[1]
 
-        result_per_page = json.dumps(data[page - 1], indent=4)
-        # result_per_page = data_list[page - 1]
-        bot.send_message(message.from_user.id,
-                         result_per_page,
+    page_text = json.dumps(page_data, indent=2)
+
+    left = page - 1 if page != 1 else page_total
+    right = page + 1 if page != page_total else 1
+
+    keyboard_pages = InlineKeyboardMarkup()
+    left_button = InlineKeyboardButton('←',
+                                       callback_data=f'to {left}')
+    page_button = InlineKeyboardButton(f'{str(page)}/{str(page_total)}',
+                                       callback_data='_')
+    right_button = InlineKeyboardButton('→',
+                                        callback_data=f'to {right}')
+    exit_button = InlineKeyboardButton('Exit', callback_data='exit')
+    keyboard_pages.add(left_button, page_button, right_button)
+    keyboard_pages.add(exit_button)
+
+    if not message.reply_markup:
+        bot.send_message(message.chat.id,
+                         page_text,
                          reply_markup=keyboard_pages)
-        bot.delete_message(message.from_user.id, previous_message.id)
-
-# def page_buttons(message,
-#                  previous_message=None,
-#                  page=1,
-#                  page_total=None) -> (
-#         InlineKeyboardMarkup):
-#
-#     left = page - 1 if page != 1 else page_total
-#     right = page + 1 if page != page_total else 1
-#
-#     keyboard_pages = InlineKeyboardMarkup()
-#
-#     left_button = InlineKeyboardButton("←",
-#                                        callback_data=f'to {left}')
-#     page_button = InlineKeyboardButton(f"{str(page)}/{str(page_total)}",
-#                                        callback_data='_')
-#     right_button = InlineKeyboardButton("→",
-#                                         callback_data=f'to {right}')
-#     keyboard_pages.add(left_button, page_button, right_button)
-#     return keyboard_pages
+    else:
+        bot.edit_message_text(page_text,
+                              message.chat.id,
+                              message.message_id,
+                              reply_markup=keyboard_pages)
 
 
 @bot.callback_query_handler(func=lambda call: True)
-def callback(call):
+def callback(call) -> None:
+    """
+    Function handles button pressing in messages with pages.
+    :param call: str
+    :return: none
+    """
     if 'to' in call.data:
         page = int(call.data.split(' ')[1])
-        message_by_page(
-                        message=call.message,
-                        previous_message=call.message,
+        message_by_page(message=call.message,
                         page=page)
     elif 'exit' in call.data:
-        data = []
-        page = -1
-        message_by_page(
-                        message=call.message,
-                        previous_message=call.message,
-                        page=page)
+        search_result_freeze(page_index=10000)
+        bot.delete_message(call.message.chat.id, call.message.message_id)
+        bot.delete_state(call.message.message_id, call.message.chat.id)

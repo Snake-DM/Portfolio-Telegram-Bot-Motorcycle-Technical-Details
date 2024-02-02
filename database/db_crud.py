@@ -1,5 +1,5 @@
 from database import database
-from database.database import main_db
+# from database.database import main_db
 from peewee import *
 
 
@@ -17,9 +17,11 @@ class DatabaseCustomCRUD:
         Class initiation
         :param active_db: SqliteDatabase
         """
-        self.active_db = active_db
+        # TODO To relize why it is no need in active_db
+        pass
 
-    def new_user_check(self, user_id: int) -> bool:
+    @staticmethod
+    def new_user_check(user_id: int) -> bool:
         """
         Method checks whether a new user has been registered in database
         already.
@@ -32,6 +34,7 @@ class DatabaseCustomCRUD:
         else:
             return False
 
+    @staticmethod
     def log_user(self,
                  user_id: int,
                  u_nickname: str = None,
@@ -69,8 +72,8 @@ class DatabaseCustomCRUD:
              .where(database.UserData.from_user_id == user_id)
              .execute())
 
-    def log_message(self,
-                    user_id: int,
+    @staticmethod
+    def log_message(user_id: int,
                     message: str) -> None:
         """
         A method logs user's messages into the database table UserMessageLog
