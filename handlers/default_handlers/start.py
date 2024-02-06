@@ -38,7 +38,7 @@ def bot_start(message: Message) -> None:
                 data['lastname'] = "Не указана"
 
         # Database Updates:
-        db_customCRUD.log_user(message.from_user.id)
+        db_customCRUD.log_user(user_id=message.from_user.id)
         db_customCRUD.log_message(message.from_user.id, message.text)
 
     bot.send_message(message.from_user.id, 'Введите свой возраст, лет')
@@ -92,7 +92,8 @@ def get_moto_experience(message: Message) -> None:
             bot.send_message(message.from_user.id,
                              '! Введенный опыт не соответствует Вашему '
                              'возрасту (в России вождение разрешено с 16 '
-                             'лет). Попробуйте ещё раз.')
+                             'лет). Попробуйте ещё раз или отмените диалог '
+                             'командой /cancel.')
         else:
             bot.send_message(message.from_user.id, 'Благодарю!')
             data['moto_experience'] = message.text
@@ -107,7 +108,7 @@ def get_moto_experience(message: Message) -> None:
         bot.send_message(message.chat.id, msg)
 
     # DB Updates:
-    db_customCRUD.log_user(message.from_user.id,
+    db_customCRUD.log_user(user_id=message.from_user.id,
                            u_nickname=data['username'],
                            u_firstname=data['firstname'],
                            u_lastname=data['lastname'],

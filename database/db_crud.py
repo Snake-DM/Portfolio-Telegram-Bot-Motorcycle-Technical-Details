@@ -35,8 +35,7 @@ class DatabaseCustomCRUD:
             return False
 
     @staticmethod
-    def log_user(self,
-                 user_id: int,
+    def log_user(user_id: int,
                  u_nickname: str = None,
                  u_firstname: str = None,
                  u_lastname: str = None,

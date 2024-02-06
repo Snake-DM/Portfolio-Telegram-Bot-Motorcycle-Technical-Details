@@ -1,6 +1,6 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
 from database.db_crud import db_customCRUD
-from keyboards.inline.pagination import search_result_freeze, message_by_page
+from keyboards.inline.pagination import message_by_page
 from loader import bot
 from states.search_states import SearchStates
 from custom_requests.api_request import api_request
@@ -20,24 +20,30 @@ def model_year_no(message: Message) -> None:
         bot.set_state(message.from_user.id,
                       SearchStates.model_year_yes,
                       message.chat.id)
-        bot.send_message(message.from_user.id, 'Какой год выпуска?')
+        bot.send_message(message.from_user.id,
+                         'Какой год выпуска?',
+                         reply_markup=ReplyKeyboardRemove())
     elif message.text.lower().endswith('нет'):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            search_result_iter = api_request("/v1/motorcycles",
-                                             {'model': data['model']},
-                                             "GET")
-        if not search_result_iter:
+            search_result_myn = api_request("/v1/motorcycles",
+                                        {'model': data['model']},
+                                        "GET")
+        if not search_result_myn:
             bot.send_message(message.from_user.id,
                              'Такая модель не найдена в базе. Попробуйте '
-                             'ввести другую модель и/или год выпуска.')
+                             'ввести другую модель и/или год выпуска.',
+                             reply_markup=ReplyKeyboardRemove())
             bot.delete_state(message.from_user.id)
         else:
-            # Handle for pagination of a message with results:
-            search_result_freeze(search_result_iter)
-            message_by_page(message)
+            bot.send_message(message.chat.id,
+                             'Ищу информацию..',
+                             reply_markup=ReplyKeyboardRemove())
 
-            # NOTE: State delete happens in callback function while exit from
-            # pagination.
+            # Handle for pagination of a message with results:
+            message_by_page(message=message,
+                            result_list=search_result_myn)
+
+            # bot.delete_state(message.from_user.id, message.chat.id)
 
             # TODO
             #  - add this code for large message results
@@ -56,11 +62,13 @@ def model_year_no(message: Message) -> None:
             # bot.delete_state(message.from_user.id)
     else:
         bot.delete_state(message.from_user.id, message.chat.id)
-        bot.send_message(message.from_user.id, 'Неправильный ввод. '
-                                               'Введите желаемую команду '
-                                               'в формате "/..". '
-                                               'Воспользуйтесь командой '
-                                               '/help при необходимости.')
+        bot.send_message(message.from_user.id,
+                         'Неправильный ввод. '
+                         'Введите желаемую команду '
+                         'в формате "/..". '
+                         'Воспользуйтесь командой '
+                         '/help при необходимости.',
+                         reply_markup=ReplyKeyboardRemove())
 
     # history log update
     db_customCRUD.log_message(message.from_user.id, message.text)

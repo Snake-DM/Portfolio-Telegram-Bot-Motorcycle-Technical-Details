@@ -4,7 +4,10 @@ from telebot.types import (InlineKeyboardMarkup,
                            Message)
 from loader import bot
 
+
 # TODO will these global vars work for multiply users?
+
+
 incoming_data = list()
 incoming_data_length = 0
 
@@ -21,12 +24,15 @@ def search_result_freeze(*args, page_index: int = 1) -> (dict, list):
     """
     global incoming_data, incoming_data_length
 
-    if not incoming_data:
+    # if not incoming_data:
+    if args:
         incoming_data = [item for item in args[0]]
         incoming_data_length = len(incoming_data)
+
     if page_index <= incoming_data_length:
         page_data = incoming_data[page_index - 1]
         return page_data, incoming_data_length
+
     else:
         incoming_data.clear()
         incoming_data_length = 0
@@ -89,4 +95,4 @@ def callback(call) -> None:
     elif 'exit' in call.data:
         search_result_freeze(page_index=10000)
         bot.delete_message(call.message.chat.id, call.message.message_id)
-        bot.delete_state(call.message.message_id, call.message.chat.id)
+        # bot.delete_state(call.message.message_id, call.message.chat.id)

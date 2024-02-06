@@ -1,6 +1,6 @@
-from telebot.types import Message
+from telebot.types import Message, ReplyKeyboardRemove
 from database.db_crud import db_customCRUD
-from keyboards.inline.pagination import search_result_freeze, message_by_page
+from keyboards.inline.pagination import message_by_page
 from loader import bot
 from states.search_states import SearchStates
 from custom_requests.api_request import api_request
@@ -18,22 +18,22 @@ def model_year_yes(message: Message) -> None:
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
-        search_result_iter = api_request("/v1/motorcycles",
-                                         {'model': data['model'],
-                                          'year':  data['year']},
-                                         "GET")
-    if not search_result_iter:
+        search_result_myy = api_request("/v1/motorcycles",
+                                    {'model': data['model'],
+                                     'year': data['year']},
+                                    "GET")
+    if not search_result_myy:
         bot.send_message(message.from_user.id,
                          'Такая модель не найдена в базе. Попробуйте ввести '
-                         'другую модель и/или год выпуска.')
+                         'другую модель и/или год выпуска.',
+                         reply_markup=ReplyKeyboardRemove())
         bot.delete_state(message.from_user.id)
     else:
         # Handle for pagination of a message with results:
-        search_result_freeze(search_result_iter)
-        message_by_page(message)
+        message_by_page(message=message,
+                        result_list=search_result_myy)
 
-        # NOTE: State delete happens in callback function while exit from
-        # pagination.
+        # bot.delete_state(message.from_user.id, message.chat.id)
 
         # TODO
         #  - add this code for large message results

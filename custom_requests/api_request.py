@@ -10,7 +10,7 @@ from config_data.config import RAPID_API_KEY, RAPID_API_HOST
 def api_request(method_endswith: str,
                 params: dict,
                 method_type: str
-                ) -> Iterable:
+                ) -> Any:
     """
     This function makes requests to API
 
