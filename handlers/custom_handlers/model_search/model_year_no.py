@@ -38,12 +38,9 @@ def model_year_no(message: Message) -> None:
             bot.send_message(message.chat.id,
                              'Ищу информацию..',
                              reply_markup=ReplyKeyboardRemove())
-
-            # Handle for pagination of a message with results:
             message_by_page(message=message,
                             result_list=search_result_myn)
-
-            # bot.delete_state(message.from_user.id, message.chat.id)
+            bot.delete_state(message.from_user.id, message.chat.id)
 
             # TODO
             #  - add this code for large message results

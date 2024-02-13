@@ -32,7 +32,7 @@ def brand_year_yes(message: Message) -> None:
                          reply_markup=ReplyKeyboardRemove())
         bot.delete_state(message.from_user.id)
     else:
-        # Handle for pagination of a message with results:
+
         message_by_page(message=message,
                         result_list=search_result_byy)
 

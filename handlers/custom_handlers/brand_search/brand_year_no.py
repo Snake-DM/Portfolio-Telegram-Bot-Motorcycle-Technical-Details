@@ -44,15 +44,13 @@ def brand_year_no(message: Message) -> None:
                              reply_markup=ReplyKeyboardRemove())
             bot.delete_state(message.from_user.id)
         else:
+
             bot.send_message(message.chat.id,
                              'Ищу информацию..',
                              reply_markup=ReplyKeyboardRemove())
-
-            # Handle for pagination of a message with results:
             message_by_page(message=message,
                             result_list=search_result_byn)
-
-            # bot.delete_state(message.from_user.id, message.chat.id)
+            bot.delete_state(message.from_user.id, message.chat.id)
 
         # TODO
         #  - add this code for large message results
@@ -70,9 +68,8 @@ def brand_year_no(message: Message) -> None:
         #         item_for_reply = message_max_length(item_for_reply)[1]
         # bot.delete_state(message.from_user.id)
     else:
-        # TODO why we get into this part after exiting pagination?
 
-        bot.delete_state(message.from_user.id, message.chat.id)
+        bot.delete_state(message.from_user.id)
         bot.send_message(message.from_user.id,
                          'Неправильный ввод. '
                          'Введите желаемую команду '
