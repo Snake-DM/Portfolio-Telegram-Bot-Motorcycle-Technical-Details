@@ -1,6 +1,6 @@
 from telebot.types import Message, ReplyKeyboardRemove
 from database.db_crud import db_customCRUD
-from keyboards.inline.pagination import message_by_page, search_freeze
+from keyboards.inline.pagination import message_by_page
 from loader import bot
 from custom_requests.api_request import api_request
 from states.search_states import SearchStates
@@ -31,37 +31,28 @@ def brand_year_no(message: Message) -> None:
         #  guidance - parameter OFFSET in request.
 
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            search_result_byn = api_request("/v1/motorcycles",
+            search_result = api_request("/v1/motorcycles",
                                         {'make': data['brand']},
                                         "GET")
-            data['search_freeze'] = search_result_byn
+            data['pages'] = search_result
 
-        search_freeze(message.from_user.id, message.chat.id)
-
-        # bot.add_data(message.from_user.id,
-        #              message.chat.id,
-        #              search_freeze=search_result_byn)
-
-        # with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        #     print(data['search_freeze'][29])
-
-        if not search_result_byn:
+        if not search_result:
             bot.send_message(message.from_user.id,
                              'Такой брэнд не найден в '
                              'базе. Попробуйте '
                              'ввести другой '
                              'вариант.',
                              reply_markup=ReplyKeyboardRemove())
-            bot.delete_state(message.from_user.id)
+            # bot.delete_state(message.from_user.id)
         else:
-
+            bot.send_chat_action(message.chat.id, 'typing', timeout=10)
             bot.send_message(message.chat.id,
                              'Ищу информацию..',
                              reply_markup=ReplyKeyboardRemove())
             message_by_page(message=message,
-                            current_user_id=message.from_user.id,
-                            current_chat_id=message.chat.id)
-            bot.delete_state(message.from_user.id, message.chat.id)
+                            current_user_id=message.from_user.id)
+                            # current_chat_id=message.chat.id)
+            # bot.delete_state(message.from_user.id, message.chat.id)
 
         # TODO
         #  - add this code for large message results
@@ -80,7 +71,7 @@ def brand_year_no(message: Message) -> None:
         # bot.delete_state(message.from_user.id)
     else:
 
-        bot.delete_state(message.from_user.id)
+        # bot.delete_state(message.from_user.id)
         bot.send_message(message.from_user.id,
                          'Неправильный ввод. '
                          'Введите желаемую команду '

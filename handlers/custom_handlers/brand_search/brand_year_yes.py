@@ -19,22 +19,24 @@ def brand_year_yes(message: Message) -> None:
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
-        search_result_byy = api_request("/v1/motorcycles",
+        search_result = api_request("/v1/motorcycles",
                                     {'make': data['brand'],
                                      'year': data['year']},
                                     "GET")
-    if not search_result_byy:
+        data['pages'] = search_result
+
+    if not search_result:
         bot.send_message(message.from_user.id,
                          'Такой брэнд не найден в '
                          'базе этого года. Попробуйте '
                          'ввести другой брэнд и/или '
                          'год выпуска.',
                          reply_markup=ReplyKeyboardRemove())
-        bot.delete_state(message.from_user.id)
+        # bot.delete_state(message.from_user.id)
     else:
 
         message_by_page(message=message,
-                        result_list=search_result_byy)
+                        current_user_id=message.from_user.id)
 
         # bot.delete_state(message.from_user.id, message.chat.id)
 

@@ -18,20 +18,22 @@ def model_year_yes(message: Message) -> None:
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
-        search_result_myy = api_request("/v1/motorcycles",
+        search_result = api_request("/v1/motorcycles",
                                     {'model': data['model'],
                                      'year': data['year']},
                                     "GET")
-    if not search_result_myy:
+        data['pages'] = search_result
+
+    if not search_result:
         bot.send_message(message.from_user.id,
                          'Такая модель не найдена в базе. Попробуйте ввести '
                          'другую модель и/или год выпуска.',
                          reply_markup=ReplyKeyboardRemove())
-        bot.delete_state(message.from_user.id)
+        # bot.delete_state(message.from_user.id)
     else:
         # Handle for pagination of a message with results:
         message_by_page(message=message,
-                        result_list=search_result_myy)
+                        current_user_id=message.from_user.id)
 
         # bot.delete_state(message.from_user.id, message.chat.id)
 

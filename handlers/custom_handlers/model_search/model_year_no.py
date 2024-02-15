@@ -25,22 +25,24 @@ def model_year_no(message: Message) -> None:
                          reply_markup=ReplyKeyboardRemove())
     elif message.text.lower().endswith('нет'):
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-            search_result_myn = api_request("/v1/motorcycles",
+            search_result = api_request("/v1/motorcycles",
                                         {'model': data['model']},
                                         "GET")
-        if not search_result_myn:
+            data['pages'] = search_result
+
+        if not search_result:
             bot.send_message(message.from_user.id,
                              'Такая модель не найдена в базе. Попробуйте '
                              'ввести другую модель и/или год выпуска.',
                              reply_markup=ReplyKeyboardRemove())
-            bot.delete_state(message.from_user.id)
+            # bot.delete_state(message.from_user.id)
         else:
             bot.send_message(message.chat.id,
                              'Ищу информацию..',
                              reply_markup=ReplyKeyboardRemove())
             message_by_page(message=message,
-                            result_list=search_result_myn)
-            bot.delete_state(message.from_user.id, message.chat.id)
+                            current_user_id=message.from_user.id)
+            # bot.delete_state(message.from_user.id, message.chat.id)
 
             # TODO
             #  - add this code for large message results
