@@ -5,17 +5,12 @@ from telebot.types import (InlineKeyboardMarkup,
 from loader import bot
 
 
-def search_freeze(cur_user_id: int = 0,
-                  cur_chat_id: int = 0):
+result_freeze = dict()
 
-    with bot.retrieve_data(cur_user_id, cur_chat_id) as data:
-        data = data['search_freeze']
-    return data
 
 def message_by_page(message: Message,
-                    page: int = 1,
-                    current_user_id: int = 0,
-                    current_chat_id: int = 0) -> None:
+                    result_list: list = None,
+                    page: int = 1) -> None:
     """
     Function uses pagination for long messages. It keeps search result
     as incoming data and passes it to internal function for further pagination
@@ -26,15 +21,13 @@ def message_by_page(message: Message,
     :return: None
     """
 
-    # with bot.retrieve_data(current_user_id, current_chat_id) as pages:
-    #     page_total = len(pages['search_freeze'])
-    #     # print('Total_pages: ', page_total)
-    #     page_data = pages['search_freeze'][page - 1]
-    #     # print('Current_page: ', page_data)
+    global result_freeze
 
+    if result_list:
+        result_freeze[message.chat.id] = result_list[:]
 
-    page_total = len(search_freeze(current_user_id, current_chat_id))
-    page_data = search_freeze(current_user_id, current_chat_id)[page - 1]
+    page_data = result_freeze[message.chat.id][page - 1]
+    page_total = len(result_freeze[message.chat.id])
 
     page_text = json.dumps(page_data, indent=2)
 
@@ -70,15 +63,13 @@ def callback(call) -> None:
     :param call: str
     :return: none
     """
+    global result_freeze
 
     if 'to' in call.data:
         new_page = int(call.data.split(' ')[1])
-        print("Это я? ", call.from_user.id)
-
         message_by_page(message=call.message,
-                        page=new_page,
-                        current_user_id=call.from_user.id,
-                        current_chat_id=call.message.chat.id)
+                        page=new_page)
     elif 'exit' in call.data:
+        del result_freeze[call.message.chat.id]
         bot.delete_message(call.message.chat.id,
                            call.message.message_id)
