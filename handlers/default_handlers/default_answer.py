@@ -1,15 +1,14 @@
 from telebot.types import Message
-
-from database import database
+from database.db_crud import db_customCRUD
 from loader import bot
-
+from states.contact_info import UserInfoState
 
 
 @bot.message_handler(state=None)
 def default_answer(message: Message) -> None:
     """
-    A default handler for every other text. This is the standard reply to
-    unknown message
+    A default handler to reply a user which send an unknown
+    command or text.
 
     :param message: incoming message from a user
     :return: none
@@ -18,7 +17,23 @@ def default_answer(message: Message) -> None:
                      "\".\nПопробуйте получить помощь, введя команду /help")
 
     # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
+    db_customCRUD.log_message(message.from_user.id, message.text)
+#
+# NOTE:  for future reference:
+#
+# @bot.message_handler(state=None)
+# def default_answer(message: Message) -> None:
+#     """
+#     A default handler unregistered user asking to proceed with a command
+#     /start.
+#
+#     :param message: incoming message from a user
+#     :return: none
+#     """
+#     bot.send_message(message.chat.id,
+#                      'Здравствутйе. Вы здесь впервые. Пожалуйста, начните '
+#                      'использование бота с команды "/Start" чтобы пройти '
+#                      'процедуру регистрации.')
+#
+#     # history log update
+#     db_customCRUD.log_message(message.from_user.id, message.text)

@@ -1,69 +1,47 @@
 from telebot.types import Message
-
 from loader import bot
 from states.contact_info import UserInfoState
-from database import database
-import os.path
+from database.db_crud import db_customCRUD
 
 
 @bot.message_handler(commands=["start"])
 def bot_start(message: Message) -> None:
     """
-   Function requests a new username.
-   :param message: incoming message from a user
-   :return: None
-   """
-
-    if database.UserData.get_or_none(from_user_id=message.from_user.id):
-        bot.send_message(message.from_user.id,
-                         'Бот уже запущен. Воспользуйтесь другой командой.')
-        bot.delete_state(message.from_user.id, message.chat.id)
-    else:
-        bot.send_message(message.from_user.id,
-                         f'Здравствуйте, {message.from_user.username}!\n'
-                         f'Данный бот позволит Вам найти детальную справочную '
-                         f'информацию по различным моделям мотоциклов.')
-
-        # with database.main_db:
-        database.UserData.create(
-                from_user_id=message.from_user.id)
-
-        # history log update
-        database.UserMessageLog.create(
-                from_user_id=message.from_user.id,
-                user_message=message.text,
-        )
-
-        bot.set_state(message.from_user.id, UserInfoState.name,
-                      message.chat.id)
-        bot.send_message(message.from_user.id, f'\nВведите своё имя')
-
-
-@bot.message_handler(state=UserInfoState.name)
-def get_name(message: Message) -> None:
-    """
-    Function register a user's name and requests an age
+    Function initiates Class DatabaseCRUD and requests a user's age.
     :param message: incoming message from a user
     :return: None
     """
-    if message.text.isalpha():
+
+    if db_customCRUD.new_user_check(message.from_user.id):
+        bot.send_message(message.from_user.id,
+                         'Бот уже запущен. Введите другую команду или '
+                         'воспользуйтесь командой /help.')
+        bot.delete_state(message.from_user.id, message.chat.id)
+        return
+    else:
         bot.set_state(message.from_user.id, UserInfoState.age, message.chat.id)
+        bot.send_message(message.from_user.id,
+                         f'Здравствуйте, {message.from_user.first_name}!\n'
+                         f'Данный бот позволит Вам найти детальную справочную '
+                         f'информацию по различным моделям мотоциклов.')
+
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['from_user_id'] = message.from_user.id
-            data['name'] = message.text
+            data['username'] = message.from_user.username
+            if message.from_user.first_name:
+                data['firstname'] = message.from_user.first_name
+            else:
+                data['firstname'] = "Не указано"
+            if message.from_user.last_name:
+                data['lastname'] = message.from_user.last_name
+            else:
+                data['lastname'] = "Не указана"
 
-        bot.send_message(message.from_user.id, 'Введите свой возраст, лет')
+        # Database Updates:
+        db_customCRUD.log_user(user_id=message.from_user.id)
+        db_customCRUD.log_message(message.from_user.id, message.text)
 
-        # history log update
-        database.UserMessageLog.create(
-                from_user_id=message.from_user.id,
-                user_message=message.text,
-        )
-
-    else:
-        bot.send_message(message.from_user.id,
-                         'Имя может содержать только буквы.'
-                         'Попробуйте ещё раз')
+    bot.send_message(message.from_user.id, 'Введите свой возраст, лет')
 
 
 @bot.message_handler(state=UserInfoState.age, is_digit=True)
@@ -73,25 +51,25 @@ def get_age(message: Message) -> None:
     :param message: incoming message from a user
     :return: None
     """
+
     bot.set_state(message.from_user.id,
                   UserInfoState.moto_driving_experience, message.chat.id)
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['age'] = message.text
 
     # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
+    db_customCRUD.log_message(message.from_user.id, message.text)
 
-    bot.send_message(message.from_user.id, 'Введите свой опыт вождения '
-                                           'мотоцикла, лет')
+    bot.send_message(message.from_user.id,
+                     'Введите свой опыт вождения мотоцикла, лет, '
+                     'соответствующий возрасту.\n'
+                     'Введите "0", если не имеете опыта.')
 
 
 @bot.message_handler(state=UserInfoState.age, is_digit=False)
 def get_age_wrong(message: Message) -> None:
     """
-    Function filters an Age wrong input
+    Function filters a wrong input for an age
     :param message: incoming message from a user
     :return: None
     """
@@ -108,37 +86,40 @@ def get_moto_experience(message: Message) -> None:
     :param message: incoming message from a user
     :return: None
     """
-    bot.send_message(message.from_user.id, 'Благодарю')
+
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        data['moto_experience'] = message.text
+        if (int(data['age']) - int(message.text)) < 16:
+            bot.send_message(message.from_user.id,
+                             '! Введенный опыт не соответствует Вашему '
+                             'возрасту (в России вождение разрешено с 16 '
+                             'лет). Попробуйте ещё раз или отмените диалог '
+                             'командой /cancel.')
+        else:
+            bot.send_message(message.from_user.id, 'Благодарю!')
+            data['moto_experience'] = message.text
 
-    msg = ("Ваши данные:\n"
-           f"Имя: {data['name']}\n"
-           f"Возраст, лет: {data['age']}\n"
-           f"Опыт вождения мотоцикла, лет:"
-           f" {data['moto_experience']}\n")
-    bot.send_message(message.chat.id, msg)
+        msg = ("Ваши данные:\n"
+               f"Ник: {data['username']}\n"
+               f"Имя: {data['firstname']}\n"
+               f"Фамилия: {data['lastname']}\n"
+               f"Возраст, лет: {data['age']}\n"
+               f"Опыт вождения мотоцикла, лет:"
+               f" {data['moto_experience']}\n")
+        bot.send_message(message.chat.id, msg)
 
-    # DB Update
-    # (with database.main_db):
-    database.UserData.update(
-            name=data['name'],
-            age=data['age'],
-            moto_experience=data['moto_experience']
-    ).where(
-            database.UserData.from_user_id ==
-            message.from_user.id
-    ).execute()
+    # DB Updates:
+    db_customCRUD.log_user(user_id=message.from_user.id,
+                           u_nickname=data['username'],
+                           u_firstname=data['firstname'],
+                           u_lastname=data['lastname'],
+                           u_age=data['age'],
+                           u_moto_exp=data['moto_experience'])
+    db_customCRUD.log_message(message.from_user.id, message.text)
 
-    # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
-
-    msg = (f"{data['name']}!\n"
-           f"Выберите параметры поиска мотоциклов через команды.\n"
-           f"Для начала используйте команду /help.")
+    msg = (f"{data['firstname']}!\n"
+           f"Выберите параметры поиска мотоциклов через встроенные "
+           f"команды бота.\n"
+           f"Используйте команду /help, чтобы начать.")
     bot.send_message(message.chat.id, msg)
     bot.delete_state(message.from_user.id, message.chat.id)
 

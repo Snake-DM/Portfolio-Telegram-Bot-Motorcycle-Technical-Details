@@ -1,6 +1,6 @@
 from telebot.types import Message
 from config_data.config import DEFAULT_COMMANDS
-from database import database
+from database.db_crud import db_customCRUD
 from loader import bot
 
 
@@ -16,7 +16,4 @@ def bot_help(message: Message) -> None:
     bot.reply_to(message, "\n".join(text))
 
     # history log update
-    database.UserMessageLog.create(
-            from_user_id=message.from_user.id,
-            user_message=message.text,
-    )
+    db_customCRUD.log_message(message.from_user.id, message.text)
