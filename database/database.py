@@ -1,20 +1,30 @@
+import datetime
 import os
 from peewee import *
 from loguru import logger
 
 
-work_directory = os.path.abspath(os.getcwd())
-db_abspath = os.path.join(work_directory, 'database', 'participants.db')
-if os.path.isfile(db_abspath):
-    main_db = SqliteDatabase('database/participants.db')
-    print('Database exists already')
-else:
-    try:
-        main_db = SqliteDatabase('database/participants.db')
-        print('New database has been created successfully')
-    except Exception as err:
-        print('Error: ', err)
-        logger.debug('Error')
+# MAIN_DB = SqliteDatabase
+
+
+@logger.catch
+def db_create() -> SqliteDatabase:
+    """
+    Function creates a database file
+    :return: SqliteDatabase
+    """
+    work_directory = os.path.abspath(os.getcwd())
+    db_abspath = os.path.join(work_directory, 'database', 'participants.db')
+    if os.path.isfile(db_abspath):
+        print("A database exists already and it will continue logging.")
+    else:
+        print('New database has been created successfully.')
+    # new_db = SqliteDatabase(os.path.join('database', 'participants.db'))
+    new_db = SqliteDatabase(db_abspath)
+    return new_db
+
+
+main_db = db_create()
 
 
 class BaseModel(Model):
@@ -22,12 +32,17 @@ class BaseModel(Model):
 
     class Meta:
         database = main_db
-        order_by = 'id'
+        order_by = 'created_at'
 
 
 class UserData(BaseModel):
-    from_user_id = CharField()
-    name = CharField(null=True)
+    created_at = DateTimeField(default=datetime.datetime.now().isoformat(
+                               sep=' ', timespec='seconds'))
+                               # strftime("%Y-%m-%d %H:%M:%S"))
+    from_user_id = IntegerField()
+    nickname = CharField(null=True)
+    firstname = CharField(null=True)
+    lastname = CharField(null=True)
     age = CharField(null=True)
     moto_experience = CharField(null=True)
 
@@ -36,6 +51,9 @@ class UserData(BaseModel):
 
 
 class UserMessageLog(BaseModel):
+    created_at = DateTimeField(default=datetime.datetime.now().isoformat(
+                               sep=' ', timespec='seconds'))
+                               # strftime("%Y-%m-%d %H:%M:%S"))
     from_user_id = ForeignKeyField(UserData)
     user_message = CharField()
 
@@ -43,5 +61,4 @@ class UserMessageLog(BaseModel):
         db_table = 'Message Log for a User'
 
 
-with main_db:
-    main_db.create_tables([UserData, UserMessageLog])
+main_db.create_tables([UserData, UserMessageLog])
