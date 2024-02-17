@@ -1,5 +1,4 @@
 from database import database
-# from database.database import main_db
 from peewee import *
 
 
@@ -17,7 +16,6 @@ class DatabaseCustomCRUD:
         Class initiation
         :param active_db: SqliteDatabase
         """
-        # TODO To relize why it is no need in active_db
         pass
 
     @staticmethod

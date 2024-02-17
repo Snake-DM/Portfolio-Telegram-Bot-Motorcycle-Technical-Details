@@ -4,11 +4,7 @@ from database.db_crud import db_customCRUD
 from loader import bot
 
 
-# TODO who to make it work in any state?
-#  Done
-
-
-@bot.message_handler(commands=["cancel"])
+@bot.message_handler(state="*", commands=["cancel"])
 def cancel_state(message: Message) -> None:
     """
     Function cancels any command for the current User.
