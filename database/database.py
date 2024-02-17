@@ -4,9 +4,6 @@ from peewee import *
 from loguru import logger
 
 
-# MAIN_DB = SqliteDatabase
-
-
 @logger.catch
 def db_create() -> SqliteDatabase:
     """
@@ -19,7 +16,6 @@ def db_create() -> SqliteDatabase:
         print("A database exists already and it will continue logging.")
     else:
         print('New database has been created successfully.')
-    # new_db = SqliteDatabase(os.path.join('database', 'participants.db'))
     new_db = SqliteDatabase(db_abspath)
     return new_db
 
