@@ -3,7 +3,6 @@ from telebot.types import Message
 from database.db_crud import db_customCRUD
 from keyboards.reply.year_keyboard import year_buttons
 from loader import bot
-from states.contact_info import UserInfoState
 from states.search_states import SearchStates
 
 # TODO Make this command available for registered users only
