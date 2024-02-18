@@ -1,5 +1,4 @@
-from collections.abc import Iterable
-from typing import Callable, Any
+from typing import Any
 from loguru import logger
 
 import requests
@@ -23,28 +22,36 @@ def api_request(method_endswith: str,
     url = f"https://motorcycles-by-api-ninjas.p.rapidapi.com{method_endswith}"
 
     if method_type == 'GET':
-        return get_request(url, params)
+        return get_request(url, params, complete_result=[])
 
 
 @logger.catch
-def get_request(url: str, params: dict) -> Any:
+def get_request(url: str, params: dict, complete_result: list) -> Any:
     """
     Function gets data from a server based on API parameters
 
     :param url: str
     :param params: dict
+    :param complete_result: list
     :return: json object
     """
 
     response = requests.get(
-        url=url,
-        headers={"X-RapidAPI-Key": RAPID_API_KEY,
-                 "X-RapidAPI-Host": RAPID_API_HOST},
-        params=params,
-        timeout=15
-    )
+            url=url,
+            headers={"X-RapidAPI-Key" : RAPID_API_KEY,
+                     "X-RapidAPI-Host": RAPID_API_HOST},
+            params=params,
+            timeout=15)
+
     if response.status_code == requests.codes.ok:
-        return response.json()
+        current_result = response.json()
+        complete_result += current_result
+        if len(current_result) == 30:
+            #  '30' is a limit for result with offset = 0 by API server
+            params['offset'] += 30
+            return get_request(url, params, complete_result)
+        else:
+            return complete_result
     else:
         logger.debug('Server Error')
         return

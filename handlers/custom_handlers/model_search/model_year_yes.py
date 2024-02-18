@@ -19,39 +19,29 @@ def model_year_yes(message: Message) -> None:
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
         data['year'] = message.text
         search_result = api_request("/v1/motorcycles",
-                                    {'model': data['model'],
-                                     'year': data['year']},
+                                    {
+                                        'model': data['model'],
+                                        'year': data['year'],
+                                        'offset': 0},
                                     "GET")
         data['pages'] = search_result
 
     if not search_result:
         bot.send_message(message.from_user.id,
-                         'Такая модель не найдена в базе. Попробуйте ввести '
-                         'другую модель и/или год выпуска.',
+                         'Такая модель не найдена в базе.\n'
+                         'Введите другое название Модели (и/или года).\n'
+                         'Для смены режима поиска отмените текущую '
+                         'команду (/cancel)',
                          reply_markup=ReplyKeyboardRemove())
-        # bot.delete_state(message.from_user.id)
+        bot.set_state(message.from_user.id,
+                      SearchStates.model,
+                      message.chat.id)
     else:
-        # Handle for pagination of a message with results:
         message_by_page(message=message,
                         current_user_id=message.from_user.id)
-
-        # bot.delete_state(message.from_user.id, message.chat.id)
-
-        # TODO
-        #  - add this code for large message results
-        #  - move this part to function [message_max_length]?
-
-        # for item in answer:
-        #     item_for_reply = json.dumps(item, indent=4)
-
-        # Splitting reply to Telegram limit of a single message:
-        #     while item_for_reply:
-        #         # message for sending (valid length)
-        #         bot.send_message(message.from_user.id,
-        #                          message_max_length(item_for_reply)[0])
-        #         # tail message
-        #         item_for_reply = message_max_length(item_for_reply)[1]
-        # bot.delete_state(message.from_user.id)
+        bot.set_state(message.from_user.id,
+                      SearchStates.model,
+                      message.chat.id)
 
     # history log update
     db_customCRUD.log_message(message.from_user.id, message.text)

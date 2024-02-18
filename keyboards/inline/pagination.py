@@ -3,8 +3,10 @@ from telebot.types import (InlineKeyboardMarkup,
                            InlineKeyboardButton,
                            Message)
 from loader import bot
+from loguru import logger
 
 
+@logger.catch
 def message_by_page(message: Message,
                     page: int = 1,
                     current_user_id: int = 0) -> None:
@@ -38,6 +40,9 @@ def message_by_page(message: Message,
     keyboard_pages.add(left_button, page_button, right_button)
     keyboard_pages.add(exit_button)
 
+    # TODO insert a handler for long messages (> 4096 symbols)
+    # for now - @logger.catch is switched on.
+
     if message.reply_markup:
         bot.edit_message_text(page_text,
                               message.chat.id,
@@ -47,6 +52,13 @@ def message_by_page(message: Message,
         bot.send_message(message.chat.id,
                          page_text,
                          reply_markup=keyboard_pages)
+
+        bot.send_message(message.chat.id,
+                         'Вы можете продолжить текущий поиск, введя новое '
+                         'название Брэнда (Модели).\n'
+                         'Для выхода из текущего режима поиска - нажмите '
+                         'кнопку Exit\n'
+                         'или введите команду /cancel')
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -65,3 +77,7 @@ def callback(call) -> None:
     elif 'exit' in call.data:
         bot.delete_message(call.message.chat.id, call.message.message_id)
         bot.delete_state(call.from_user.id, call.message.chat.id)
+        bot.send_message(call.from_user.id,
+                         'Введите новую команду.\n'
+                         'Используйте команду /help для справки\n'
+                         'или встроенное меню выбора команд')
