@@ -1,11 +1,9 @@
 from telebot.types import Message
 
-from database.db_crud import db_customCRUD
+from database.database import DataBaseCRUD
 from keyboards.reply.year_keyboard import year_buttons
 from loader import bot
 from states.search_states import SearchStates
-
-# TODO Make this command available for registered users only
 
 
 @bot.message_handler(commands=["model"])
@@ -21,7 +19,7 @@ def model_query(message: Message) -> None:
                                            f'которую Вы ищете.')
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
 
 
 @bot.message_handler(state=SearchStates.model)
@@ -44,4 +42,4 @@ def get_model_name(message: Message) -> None:
                      reply_markup=year_buttons())
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)

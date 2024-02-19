@@ -10,5 +10,6 @@ class UserInfoState(StatesGroup):
     a motorcycle (assume driving experience could start at the
     age of 16 and should be less than the user's age accordingly)
     """
+
     age = State()
     moto_driving_experience = State()

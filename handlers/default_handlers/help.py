@@ -1,6 +1,8 @@
 from telebot.types import Message
+
 from config_data.config import DEFAULT_COMMANDS
-from database.db_crud import db_customCRUD
+
+from database.database import DataBaseCRUD
 from loader import bot
 
 
@@ -16,4 +18,4 @@ def bot_help(message: Message) -> None:
     bot.reply_to(message, "\n".join(text))
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)

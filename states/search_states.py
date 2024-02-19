@@ -13,6 +13,7 @@ class SearchStates(StatesGroup):
     model_year_yes / model_year_no:
         search by moto model with / without requested year of production
     """
+
     brand = State()
     brand_year_yes = State()
     brand_year_no = State()

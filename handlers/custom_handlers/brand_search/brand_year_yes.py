@@ -1,9 +1,9 @@
 from telebot.types import Message, ReplyKeyboardRemove
 
-from database.db_crud import db_customCRUD
+from custom_requests.api_request import api_request
+from database.database import DataBaseCRUD
 from keyboards.inline.pagination import message_by_page
 from loader import bot
-from custom_requests.api_request import api_request
 from states.search_states import SearchStates
 
 
@@ -44,4 +44,4 @@ def brand_year_yes(message: Message) -> None:
                       SearchStates.brand,
                       message.chat.id)
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
