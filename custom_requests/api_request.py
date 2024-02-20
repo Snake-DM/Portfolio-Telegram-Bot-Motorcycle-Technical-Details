@@ -1,8 +1,9 @@
 from typing import Any
-from loguru import logger
 
 import requests
-from config_data.config import RAPID_API_KEY, RAPID_API_HOST
+from loguru import logger
+
+from config_data.config import RAPID_API_HOST, RAPID_API_KEY
 
 
 @logger.catch
@@ -38,7 +39,7 @@ def get_request(url: str, params: dict, complete_result: list) -> Any:
 
     response = requests.get(
             url=url,
-            headers={"X-RapidAPI-Key" : RAPID_API_KEY,
+            headers={"X-RapidAPI-Key": RAPID_API_KEY,
                      "X-RapidAPI-Host": RAPID_API_HOST},
             params=params,
             timeout=15)

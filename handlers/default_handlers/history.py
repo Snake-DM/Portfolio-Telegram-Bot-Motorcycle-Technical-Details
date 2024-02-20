@@ -1,7 +1,8 @@
 from telebot.types import Message
 
 from database import database
-from database.db_crud import db_customCRUD
+
+from database.database import DataBaseCRUD
 from loader import bot
 
 
@@ -13,7 +14,6 @@ def print_history(message: Message) -> None:
     :param message: incoming message from a user
     :return: none
     """
-    # getting a chat history from DB
     bot.send_message(message.from_user.id,
                      'Ваша история запросов (последние 10 записей):')
     user_messages = (
@@ -29,4 +29,4 @@ def print_history(message: Message) -> None:
     bot.send_message(message.from_user.id, history_reply)
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)

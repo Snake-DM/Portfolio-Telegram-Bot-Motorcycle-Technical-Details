@@ -1,9 +1,9 @@
 import json
-from telebot.types import (InlineKeyboardMarkup,
-                           InlineKeyboardButton,
-                           Message)
-from loader import bot
+
 from loguru import logger
+from telebot.types import (InlineKeyboardButton, InlineKeyboardMarkup, Message)
+
+from loader import bot
 
 
 @logger.catch
@@ -39,9 +39,6 @@ def message_by_page(message: Message,
     exit_button = InlineKeyboardButton('Exit', callback_data='exit')
     keyboard_pages.add(left_button, page_button, right_button)
     keyboard_pages.add(exit_button)
-
-    # TODO insert a handler for long messages (> 4096 symbols)
-    # for now - @logger.catch is switched on.
 
     if message.reply_markup:
         bot.edit_message_text(page_text,

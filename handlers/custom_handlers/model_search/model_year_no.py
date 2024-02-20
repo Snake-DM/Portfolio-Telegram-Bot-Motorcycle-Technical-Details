@@ -1,9 +1,10 @@
 from telebot.types import Message, ReplyKeyboardRemove
-from database.db_crud import db_customCRUD
+
+from custom_requests.api_request import api_request
+from database.database import DataBaseCRUD
 from keyboards.inline.pagination import message_by_page
 from loader import bot
 from states.search_states import SearchStates
-from custom_requests.api_request import api_request
 
 
 @bot.message_handler(state=SearchStates.model_year_no)
@@ -24,12 +25,6 @@ def model_year_no(message: Message) -> None:
                          'Какой год выпуска?',
                          reply_markup=ReplyKeyboardRemove())
     elif message.text.lower().endswith('нет'):
-
-        # TODO bot chat action not working so far
-        # bot.send_chat_action(message.chat.id,
-        #                      action="searching..",
-        #                      timeout=10)
-
         bot.send_message(message.chat.id,
                          'Ищу информацию..',
                          reply_markup=ReplyKeyboardRemove())
@@ -57,4 +52,4 @@ def model_year_no(message: Message) -> None:
                           SearchStates.model,
                           message.chat.id)
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
