@@ -1,18 +1,19 @@
 from telebot.types import Message
+
+from database.database import DataBaseCRUD
 from loader import bot
 from states.contact_info import UserInfoState
-from database.db_crud import db_customCRUD
 
 
 @bot.message_handler(commands=["start"])
 def bot_start(message: Message) -> None:
     """
-    Function initiates Class DatabaseCRUD and requests a user's age.
+    Function initiates Class DataBaseCRUD and requests a user's age.
     :param message: incoming message from a user
     :return: None
     """
 
-    if db_customCRUD.new_user_check(message.from_user.id):
+    if DataBaseCRUD.new_user_check(message.from_user.id):
         bot.send_message(message.from_user.id,
                          'Бот уже запущен. Введите другую команду или '
                          'воспользуйтесь командой /help.')
@@ -38,10 +39,10 @@ def bot_start(message: Message) -> None:
                 data['lastname'] = "Не указана"
 
         # Database Updates:
-        db_customCRUD.log_user(user_id=message.from_user.id)
-        db_customCRUD.log_message(message.from_user.id, message.text)
+        DataBaseCRUD.log_user(user_id=message.from_user.id)
+        DataBaseCRUD.log_message(message.from_user.id, message.text)
 
-    bot.send_message(message.from_user.id, 'Введите свой возраст, лет')
+    bot.send_message(message.from_user.id, 'Введите свой возраст')
 
 
 @bot.message_handler(state=UserInfoState.age, is_digit=True)
@@ -58,7 +59,7 @@ def get_age(message: Message) -> None:
         data['age'] = message.text
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
 
     bot.send_message(message.from_user.id,
                      'Введите свой опыт вождения мотоцикла, лет, '
@@ -75,7 +76,7 @@ def get_age_wrong(message: Message) -> None:
     """
     bot.send_message(message.from_user.id,
                      'Возраст может содержать только цифры. Попробуйте '
-                     'ещё раз')
+                     'ещё раз.')
 
 
 @bot.message_handler(state=UserInfoState.moto_driving_experience,
@@ -88,12 +89,16 @@ def get_moto_experience(message: Message) -> None:
     """
 
     with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
-        if (int(data['age']) - int(message.text)) < 16:
+        if int(data['age']) - int(message.text) < 16 and \
+                int(message.text) != 0:
             bot.send_message(message.from_user.id,
                              '! Введенный опыт не соответствует Вашему '
-                             'возрасту (в России вождение разрешено с 16 '
-                             'лет). Попробуйте ещё раз или отмените диалог '
-                             'командой /cancel.')
+                             'возрасту (в России вождение на '
+                             'мотоцикле разрешено с 16 лет).\n '
+                             'Попробуйте ещё раз.')
+            bot.set_state(message.from_user.id,
+                          UserInfoState.moto_driving_experience,
+                          message.chat.id)
         else:
             bot.send_message(message.from_user.id, 'Благодарю!')
             data['moto_experience'] = message.text
@@ -108,13 +113,13 @@ def get_moto_experience(message: Message) -> None:
         bot.send_message(message.chat.id, msg)
 
     # DB Updates:
-    db_customCRUD.log_user(user_id=message.from_user.id,
-                           u_nickname=data['username'],
-                           u_firstname=data['firstname'],
-                           u_lastname=data['lastname'],
-                           u_age=data['age'],
-                           u_moto_exp=data['moto_experience'])
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_user(user_id=message.from_user.id,
+                          u_nickname=data['username'],
+                          u_firstname=data['firstname'],
+                          u_lastname=data['lastname'],
+                          u_age=data['age'],
+                          u_moto_exp=data['moto_experience'])
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
 
     msg = (f"{data['firstname']}!\n"
            f"Выберите параметры поиска мотоциклов через встроенные "

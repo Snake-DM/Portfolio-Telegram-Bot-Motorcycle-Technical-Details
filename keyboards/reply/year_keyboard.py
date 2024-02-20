@@ -1,4 +1,4 @@
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import KeyboardButton, ReplyKeyboardMarkup
 
 
 def year_buttons() -> ReplyKeyboardMarkup:

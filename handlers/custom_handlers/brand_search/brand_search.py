@@ -1,6 +1,6 @@
-from telebot.types import Message, ReplyKeyboardRemove
+from telebot.types import Message
 
-from database.db_crud import db_customCRUD
+from database.database import DataBaseCRUD
 from keyboards.reply.year_keyboard import year_buttons
 from loader import bot
 from states.search_states import SearchStates
@@ -15,11 +15,11 @@ def brand_query(message: Message) -> None:
     :return: none
     """
     bot.set_state(message.from_user.id, SearchStates.brand, message.chat.id)
-    bot.send_message(message.from_user.id, f'Введите название брэнда, '
-                                           f'который Вы ищете.')
+    bot.send_message(message.from_user.id,
+                     f'Введите название брэнда, который Вы ищете.')
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
 
 
 @bot.message_handler(state=SearchStates.brand)
@@ -40,4 +40,4 @@ def get_brand_name(message: Message) -> None:
                      reply_markup=year_buttons())
 
     # history log update
-    db_customCRUD.log_message(message.from_user.id, message.text)
+    DataBaseCRUD.log_message(message.from_user.id, message.text)
